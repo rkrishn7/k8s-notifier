@@ -2,7 +2,16 @@
 name = "k8s-notifier"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.71.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.72"
+futures = "0.3.28"
+k8s-openapi = { version = "0.18.0", features = ["v1_25"] }
+kube = { version = "0.84.0", features = ["admission", "runtime"] }
+serde_json = "1.0.104"
+tokio = { version = "1.29.1", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
