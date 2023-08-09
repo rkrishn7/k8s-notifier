@@ -38,9 +38,4 @@ jobs:
         run: |
           cr package charts/* # Package your charts that are in 'charts' directory
           cr upload -o ${{ github.repository_owner }} -r ${{ github.event.repository.name }} -t ${{ secrets.GITHUB_TOKEN }} # Upload the charts
-          cr index -i ./index.yaml -o ${{ github.repository_owner }} -r ${{ github.event.repository.name }}
-
-          # Commit the index.yaml changes
-          git add index.yaml
-          git commit -m "Update index.yaml"
-          git push origin HEAD:${{ github.ref }}
+          cr index -i ./index.yaml -o ${{ github.repository_owner }} -r ${{ github.event.repository.name }} --push
