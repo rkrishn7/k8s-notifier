@@ -1,6 +1,6 @@
 apiVersion: v2
 name: k8s-notifier
-description: A Helm chart for Kubernetes
+description: k8s-notifier is a lightweight watcher and notifier for cluster resources
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -11,6 +11,12 @@ description: A Helm chart for Kubernetes
 # a dependency of application charts to inject those utilities and functions into the rendering
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
+
+sources:
+  - https://github.com/rkrishn7/k8s-notifier
+
+maintainers:
+  - name: rkrishn7
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
