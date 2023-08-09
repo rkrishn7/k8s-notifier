@@ -3,7 +3,7 @@ name: Release Charts
 on:
   push:
     branches:
-      - master # Change this to your main branch if needed
+      - main
 
 jobs:
   release-charts:
