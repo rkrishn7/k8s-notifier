@@ -12,10 +12,11 @@ COPY ./Cargo.lock ./Cargo.lock
 RUN cargo build --release
 RUN rm src/*.rs
 
-COPY ./src ./src
+COPY . .
 
 # Build for release
 RUN rm ./target/release/deps/k8s_notifier*
+
 RUN cargo build --release
 
 FROM debian:buster-slim
