@@ -5,12 +5,11 @@ use k8s_openapi::api::core::v1::{Node, Pod};
 use kube::{
     api::Api,
     runtime::{watcher, WatchStreamExt},
-    Client, ResourceExt,
+    Client,
 };
 use tokio::{sync::broadcast, task::JoinHandle};
-use tracing::{debug, error};
+use tracing::error;
 
-use super::notification::{Notification, NotificationLogLevel};
 use crate::namespace::NamespaceScope;
 use crate::resource::{PackedResource, WatchedResource};
 
@@ -86,22 +85,17 @@ impl ResourceWatcher {
         futures::stream::select_all(streams)
     }
 
-    pub fn watch(&self) -> (JoinHandle<()>, broadcast::Receiver<Notification>) {
+    pub fn watch(&self) -> (JoinHandle<()>, broadcast::Sender<PackedResource>) {
         let mut stream = self.create_multiplexed_resource_stream();
-        let (tx, rx) = broadcast::channel(256);
+        let (tx, _) = broadcast::channel(256);
+
+        let inner_tx = tx.clone();
 
         let handle = tokio::spawn(async move {
             while let Some(resource) = stream.next().await {
                 match resource {
                     Ok(resource) => {
-                        let result = match resource {
-                            PackedResource::Node(node) => {
-                                Self::broadcast_node_notifications(&node, &tx)
-                            }
-                            PackedResource::Pod(_) => todo!(),
-                        };
-
-                        if let Err(e) = result {
+                        if let Err(e) = inner_tx.send(resource) {
                             error!("Error broadcasting resource update {:?}", e);
                         }
                     }
@@ -112,36 +106,6 @@ impl ResourceWatcher {
             }
         });
 
-        (handle, rx)
-    }
-
-    fn broadcast_node_notifications(
-        node: &Node,
-        tx: &broadcast::Sender<Notification>,
-    ) -> anyhow::Result<()> {
-        let node_name = node.name_any();
-
-        let notification = if let Some(true) = node
-            .spec
-            .as_ref()
-            .expect("node should have spec")
-            .unschedulable
-        {
-            Notification {
-                message: format!("Node {} is unschedulable", node_name),
-                level: NotificationLogLevel::Error,
-            }
-        } else {
-            Notification {
-                message: format!("Node {} is healthy", node_name),
-                level: NotificationLogLevel::Info,
-            }
-        };
-
-        let num_notifiers = tx.send(notification)?;
-
-        debug!("Sent notification to {num_notifiers} notifiers");
-
-        Ok(())
+        (handle, tx)
     }
 }
