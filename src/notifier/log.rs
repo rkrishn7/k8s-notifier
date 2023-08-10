@@ -3,7 +3,7 @@ use futures::StreamExt;
 use tokio::sync::broadcast;
 use tokio_stream::wrappers::{errors::BroadcastStreamRecvError, BroadcastStream};
 
-use super::notifier::{impl_packed_resource_stream, Loggable, Notifier, NotifierLogLevel};
+use super::{impl_loggable, impl_packed_resource_stream, Loggable, Notifier, NotifierLogLevel};
 
 use crate::resource::PackedResource;
 
@@ -63,15 +63,11 @@ impl Notifier for LogNotifier {
     }
 }
 
+impl_packed_resource_stream!(LogNotifier, rx);
+
 pub struct LogNotification {
     level: NotifierLogLevel,
     message: String,
 }
 
-impl Loggable for LogNotification {
-    fn log_level(&self) -> NotifierLogLevel {
-        self.level
-    }
-}
-
-impl_packed_resource_stream!(LogNotifier, rx);
+impl_loggable!(LogNotification, level);

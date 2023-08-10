@@ -4,7 +4,7 @@ use serde_json::json;
 use tokio::sync::broadcast;
 use tokio_stream::wrappers::{errors::BroadcastStreamRecvError, BroadcastStream};
 
-use super::notifier::{
+use super::{
     impl_loggable, impl_packed_resource_stream, Loggable, Notifier, NotifierLogLevel,
 };
 
