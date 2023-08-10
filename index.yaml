@@ -3,6 +3,20 @@ entries:
   k8s-notifier:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2023-08-10T00:35:10.237325225Z"
+    description: k8s-notifier is a lightweight watcher and notifier for cluster resources
+    digest: 7b7d07ad6cb75ab39ec9d7076d5ee72e116125d3ff0abd0873c4ea5cf84add94
+    maintainers:
+    - name: rkrishn7
+    name: k8s-notifier
+    sources:
+    - https://github.com/rkrishn7/k8s-notifier
+    type: application
+    urls:
+    - https://github.com/rkrishn7/k8s-notifier/releases/download/k8s-notifier-0.1.6/k8s-notifier-0.1.6.tgz
+    version: 0.1.6
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2023-08-09T21:59:20.78678012Z"
     description: k8s-notifier is a lightweight watcher and notifier for cluster resources
     digest: 28d86880e7e694ff3efe3e14e4aa9c27c43740d7968f0346d4328a3bf1037ddb
@@ -15,4 +29,4 @@ entries:
     urls:
     - https://github.com/rkrishn7/k8s-notifier/releases/download/k8s-notifier-0.1.5/k8s-notifier-0.1.5.tgz
     version: 0.1.5
-generated: "2023-08-09T21:59:20.78678632Z"
+generated: "2023-08-10T00:35:10.237334025Z"
