@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: k8s-notifier
+  repository: rkrishnaswamy/k8s-notifier
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
