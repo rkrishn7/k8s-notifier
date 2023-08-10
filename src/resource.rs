@@ -1,6 +1,8 @@
 use clap::ValueEnum;
 use k8s_openapi::api::core::v1::{Node, Pod};
 
+pub mod ext;
+
 /// Packs API resources into a single type in order to create a unified resource
 /// stream containing any registered resources for watching
 #[derive(Debug, Clone)]

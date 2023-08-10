@@ -19,6 +19,8 @@ pub struct ResourceWatcher {
     resources: Vec<WatchedResource>,
 }
 
+type WatcherOutput = Result<PackedResource, kube::runtime::watcher::Error>;
+
 impl ResourceWatcher {
     pub fn new(
         client: Client,
@@ -34,14 +36,8 @@ impl ResourceWatcher {
 
     fn create_multiplexed_resource_stream(
         &self,
-    ) -> futures::stream::SelectAll<
-        Pin<
-            Box<
-                dyn Stream<Item = Result<PackedResource, kube::runtime::watcher::Error>>
-                    + std::marker::Send,
-            >,
-        >,
-    > {
+    ) -> futures::stream::SelectAll<Pin<Box<dyn Stream<Item = WatcherOutput> + std::marker::Send>>>
+    {
         let mut streams = vec![];
         for resource in &self.resources {
             match resource {

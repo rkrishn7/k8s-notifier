@@ -4,9 +4,7 @@ use serde_json::json;
 use tokio::sync::broadcast;
 use tokio_stream::wrappers::{errors::BroadcastStreamRecvError, BroadcastStream};
 
-use super::{
-    impl_loggable, impl_packed_resource_stream, Loggable, Notifier, NotifierLogLevel,
-};
+use super::{impl_loggable, impl_packed_resource_stream, Loggable, Notifier, NotifierLogLevel};
 
 use crate::resource::ext::node::NodeExt;
 use crate::resource::ext::pod::PodExt;
@@ -76,7 +74,7 @@ impl Notifier for SlackNotifier {
 
                 let labels_section = format!(
                     "*Labels*\n{}",
-                    if labels_formatted == "" {
+                    if labels_formatted.is_empty() {
                         "<None>".to_string()
                     } else {
                         labels_formatted
@@ -84,7 +82,7 @@ impl Notifier for SlackNotifier {
                 );
                 let addresses_section = format!(
                     "*Addresses*\n{}",
-                    if addresses_formatted == "" {
+                    if addresses_formatted.is_empty() {
                         "<None>".to_string()
                     } else {
                         addresses_formatted
@@ -92,7 +90,7 @@ impl Notifier for SlackNotifier {
                 );
                 let conditions_section = format!(
                     "*Conditions*\n{}",
-                    if conditions_formatted == "" {
+                    if conditions_formatted.is_empty() {
                         "<None>".to_string()
                     } else {
                         conditions_formatted
@@ -178,7 +176,7 @@ impl Notifier for SlackNotifier {
 
                     let labels_section = format!(
                         "*Labels*\n{}",
-                        if labels_formatted == "" {
+                        if labels_formatted.is_empty() {
                             "<None>".to_string()
                         } else {
                             labels_formatted

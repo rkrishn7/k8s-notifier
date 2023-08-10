@@ -28,11 +28,11 @@ impl PodExt for Pod {
     }
 
     fn ip_addr(&self) -> Option<&String> {
-        Some(self.status.as_ref()?.pod_ip.as_ref()?)
+        self.status.as_ref()?.pod_ip.as_ref()
     }
 
     fn phase(&self) -> Option<&String> {
-        Some(self.status.as_ref()?.phase.as_ref()?)
+        self.status.as_ref()?.phase.as_ref()
     }
 
     fn namespace(&self) -> Option<String> {
