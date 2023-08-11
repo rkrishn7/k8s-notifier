@@ -24,7 +24,7 @@ WORKDIR /app
 
 # Install libssl (Rust links against this library)
 RUN apt-get update && \
-    apt-get install -y libssl-dev && \
+    apt-get install -y libssl-dev ca-certificates && \
     apt-get clean
 
 # Copy the binary from the builder stage
