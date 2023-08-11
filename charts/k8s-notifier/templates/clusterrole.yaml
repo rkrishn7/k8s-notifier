@@ -13,7 +13,9 @@ rules:
   - pods
   - namespaces
   - nodes
+  - events
   verbs:
+  - get
   - list
   - watch
 - apiGroups:
