@@ -29,7 +29,7 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/k8s-notifier:${{ steps.vars.outputs.tag }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/k8s-notifier:${{ steps.vars.outputs.release_tag }}
 
       # Setup Helm
       - name: Set up Helm
