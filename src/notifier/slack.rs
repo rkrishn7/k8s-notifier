@@ -6,6 +6,7 @@ use tokio_stream::wrappers::{errors::BroadcastStreamRecvError, BroadcastStream};
 
 use super::{impl_loggable, impl_packed_resource_stream, Loggable, Notifier, NotifierLogLevel};
 
+use crate::resource::ext::event::EventExt;
 use crate::resource::ext::node::NodeExt;
 use crate::resource::ext::pod::PodExt;
 use crate::resource::PackedResource;
@@ -44,6 +45,7 @@ impl SlackNotifier {
 impl Notifier for SlackNotifier {
     type Notification = SlackNotification;
 
+    // TODO(rkrishn7): Refactor this monstrosity
     fn create_notifications(&self, resource: &PackedResource) -> Vec<Self::Notification> {
         let mut notifications = vec![];
 
@@ -243,6 +245,100 @@ impl Notifier for SlackNotifier {
                                                 {
                                                     "type": "mrkdwn",
                                                     "text": labels_section
+                                                },
+                                            ]
+                                        },
+                                    ]
+                                }
+                            ]
+                        }),
+                        level: log_level,
+                    });
+                }
+            }
+            PackedResource::Event(event) => {
+                if let Some(typ) = event.typ() {
+                    let log_level = if typ == "Normal" {
+                        NotifierLogLevel::Info
+                    } else {
+                        NotifierLogLevel::Warn
+                    };
+                    let color = get_notification_color(log_level);
+                    let title = format!(
+                        "*{}* events seen from the {} `{}`",
+                        event.count().unwrap_or(0),
+                        event
+                            .involved_object_kind()
+                            .unwrap_or(&"<Unknown Resource>".to_string()),
+                        event
+                            .involved_object_name()
+                            .unwrap_or(&"<Unknown Name>".to_string())
+                    );
+
+                    let first_seen_section = format!(
+                        "*First Seen*\n`{}`",
+                        event
+                            .first_timestamp()
+                            .map(|t| t.to_string())
+                            .unwrap_or("<Unknown>".to_string())
+                    );
+                    let last_seen_section = format!(
+                        "*Last Seen*\n`{}`",
+                        event
+                            .last_timestamp()
+                            .map(|t| t.to_string())
+                            .unwrap_or("<Unknown>".to_string())
+                    );
+                    let message_section = format!(
+                        "*Message*\n{}",
+                        event.message().unwrap_or(&"\"\"".to_string())
+                    );
+                    let reason_section = format!(
+                        "*Reason*\n{}",
+                        event.reason().unwrap_or(&"\"\"".to_string())
+                    );
+
+                    notifications.push(SlackNotification {
+                        inner: json!(
+                            {
+                            "channel": &self.channel_id,
+                            "attachments": [
+                                {
+                                    "color": color,
+                                    "blocks": [
+                                        {
+                                            "type": "section",
+                                            "text": {
+                                                "type": "mrkdwn",
+                                                "text": title,
+                                            }
+                                        },
+                                        {
+                                            "type": "divider"
+                                        },
+                                        {
+                                            "type": "section",
+                                            "fields": [
+                                                {
+                                                    "type": "mrkdwn",
+                                                    "text": first_seen_section
+                                                },
+                                                {
+                                                    "type": "mrkdwn",
+                                                    "text": last_seen_section
+                                                },
+                                            ]
+                                        },
+                                        {
+                                            "type": "section",
+                                            "fields": [
+                                                {
+                                                    "type": "mrkdwn",
+                                                    "text": reason_section
+                                                },
+                                                {
+                                                    "type": "mrkdwn",
+                                                    "text": message_section
                                                 },
                                             ]
                                         },

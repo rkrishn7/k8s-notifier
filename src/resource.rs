@@ -1,5 +1,5 @@
 use clap::ValueEnum;
-use k8s_openapi::api::core::v1::{Node, Pod};
+use k8s_openapi::api::core::v1::{Event, Node, Pod};
 
 pub mod ext;
 
@@ -11,6 +11,8 @@ pub enum PackedResource {
     Node(Node),
     /// A Pod resource
     Pod(Pod),
+    /// A Event resource
+    Event(Event),
 }
 
 /// A watched resource
@@ -18,6 +20,7 @@ pub enum PackedResource {
 pub enum WatchedResource {
     Node,
     Pod,
+    Event,
 }
 
 impl std::fmt::Display for WatchedResource {
@@ -25,6 +28,7 @@ impl std::fmt::Display for WatchedResource {
         let typ = match self {
             WatchedResource::Node => "node",
             WatchedResource::Pod => "pod",
+            WatchedResource::Event => "event",
         };
 
         write!(f, "{}", typ)

@@ -1,7 +1,7 @@
 use std::pin::Pin;
 
 use futures::{Stream, StreamExt, TryStreamExt};
-use k8s_openapi::api::core::v1::{Node, Pod};
+use k8s_openapi::api::core::v1::{Event, Node, Pod};
 use kube::{
     api::Api,
     runtime::{watcher, WatchStreamExt},
@@ -71,6 +71,30 @@ impl ResourceWatcher {
                                 .default_backoff()
                                 .applied_objects()
                                 .map_ok(PackedResource::Pod)
+                                .boxed()
+                        }));
+                    }
+                },
+                WatchedResource::Event => match &self.namespace_scope {
+                    NamespaceScope::All => {
+                        let pods: Api<Event> = Api::all(self.client.clone());
+                        streams.push(
+                            watcher(pods, watcher::Config::default())
+                                .default_backoff()
+                                .applied_objects()
+                                .map_ok(PackedResource::Event)
+                                .boxed(),
+                        )
+                    }
+                    NamespaceScope::Names(names) => {
+                        streams.extend(names.iter().map(|name| {
+                            let pods: Api<Event> =
+                                Api::namespaced(self.client.clone(), name.as_str());
+
+                            watcher(pods, watcher::Config::default())
+                                .default_backoff()
+                                .applied_objects()
+                                .map_ok(PackedResource::Event)
                                 .boxed()
                         }));
                     }

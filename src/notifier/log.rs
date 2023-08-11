@@ -28,6 +28,7 @@ impl Notifier for LogNotifier {
     fn create_notifications(&self, resource: &PackedResource) -> Vec<Self::Notification> {
         let mut notifications = vec![];
 
+        // TODO(rkrishn7): Implement
         match resource {
             PackedResource::Node(_) => notifications.push(LogNotification {
                 level: NotifierLogLevel::Info,
@@ -36,6 +37,10 @@ impl Notifier for LogNotifier {
             PackedResource::Pod(_) => notifications.push(LogNotification {
                 level: NotifierLogLevel::Info,
                 message: "Pod seen".to_string(),
+            }),
+            PackedResource::Event(_) => notifications.push(LogNotification {
+                level: NotifierLogLevel::Info,
+                message: "Event seen".to_string(),
             }),
         }
 
