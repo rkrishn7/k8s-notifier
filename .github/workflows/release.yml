@@ -1,4 +1,4 @@
-name: Release Charts
+name: Release
 
 on:
   push:
@@ -6,45 +6,63 @@ on:
       - main
 
 jobs:
-  release-charts:
+  release-image:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Generate Release Vars
+      # Checks to see if the version in Cargo.toml was bumped. If so, release a new image
+      - name: Check Release
         id: vars
-        run: echo "release_tag=$(grep -E '^version\s*=' Cargo.toml | sed -r 's/^version[ \t]*=[ \t]*//' | tr -d '"')" >> $GITHUB_OUTPUT
+        run: |
+          if git diff HEAD~ Cargo.toml | grep '^\+\s*version'; then
+            echo "should_release_docker_image='1'" >> $GITHUB_OUTPUT
+            echo "image_release_tag=$(grep -E '^version\s*=' Cargo.toml | sed -r 's/^version[ \t]*=[ \t]*//' | tr -d '"')" >> $GITHUB_OUTPUT
+          else
+            echo "should_release_docker_image='0'" >> $GITHUB_OUTPUT
+          fi
+          if git diff HEAD~ charts/k8s-notifier/Chart.yaml | grep '^\+\s*version'; then
+            echo "should_release_helm_chart='1'" >> $GITHUB_OUTPUT
+          else
+            echo "should_release_helm_chart='0'" >> $GITHUB_OUTPUT
+          fi
 
       - name: Login to Docker Hub
+        &should_release_docker_img if: steps.vars.outputs.should_release_docker_image == '1'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker images
+      - name: Build and Push Docker images
+        if: *should_release_docker_img
         uses: docker/build-push-action@v4.1.1
         with:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/k8s-notifier:${{ steps.vars.outputs.release_tag }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/k8s-notifier:${{ steps.vars.outputs.image_release_tag }}, ${{ secrets.DOCKERHUB_USERNAME }}/k8s-notifier:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/k8s-notifier:latest
+          cache-to: type=inline
 
       # Setup Helm
       - name: Set up Helm
+        &should_release_helm_chart if: steps.vars.outputs.should_release_helm_chart == '1'
         uses: azure/setup-helm@v1
         with:
           version: '3.6.3' # You can specify the Helm version
 
       # Configure git user (needed by Helm Chart Releaser)
       - name: Configure Git User
+        if: *should_release_helm_chart
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "${{ github.repository_owner }}"
+          git config user.email "ro@rohank.me"
 
       # Setup Chart Releaser
       - name: Install Helm Chart Releaser
+        if: *should_release_helm_chart
         run: |
           VERSION=$(curl --silent "https://api.github.com/repos/helm/chart-releaser/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
           curl -fsSL -o cr.tar.gz "https://github.com/helm/chart-releaser/releases/download/$VERSION/chart-releaser_${VERSION#v}_linux_amd64.tar.gz"
@@ -53,6 +71,7 @@ jobs:
 
       # Create GitHub Release and upload Helm charts
       - name: Release Charts
+        if: *should_release_helm_chart
         run: |
           cr package charts/* # Package your charts that are in 'charts' directory
           cr upload -o ${{ github.repository_owner }} -r ${{ github.event.repository.name }} -t ${{ secrets.GITHUB_TOKEN }} # Upload the charts

@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use k8s_openapi::api::core::v1::Pod;
 use kube::api::ResourceExt;
 
-/// Helper methods for [`Node`]
+/// Helper methods for [`Pod`]
 pub trait PodExt {
     /// The IP address of the pod within the cluster
     fn ip_addr(&self) -> Option<&String>;

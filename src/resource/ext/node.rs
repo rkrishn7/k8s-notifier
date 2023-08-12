@@ -7,20 +7,18 @@ use kube::api::ResourceExt;
 pub trait NodeExt {
     /// Returns a map of the node's conditions in the form:
     ///
-    /// ```
+    /// ```json
     /// {
     ///     "MemoryPressure": "False",
-    ///     "DiskPressure": "False",
-    ///     ...
+    ///     "DiskPressure": "False"
     /// }
     fn status_conditions(&self) -> Option<BTreeMap<&String, &String>>;
     /// Returns a map of the node's addresses in the form:
     ///
-    /// ```
+    /// ```json
     /// {
     ///     "InternalIP": "192.168.0.1",
-    ///     "Hostname": "kubernetes",
-    ///     ...
+    ///     "Hostname": "kubernetes"
     /// }
     fn addresses(&self) -> Option<BTreeMap<&String, &String>>;
     /// Wrapper around [`ResourceExt::name_any`]
